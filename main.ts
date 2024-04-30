@@ -31,7 +31,7 @@ app.post('/applyLoan', async (req, res) => {
 function waitForFinalResponse(): Promise<string> {
   return new Promise((resolve, reject) => {
     // Response Service listens for messages from Credit Service
-    receiveFromQueue('microservicesQueue', function (message) {
+    receiveFromQueue('clientQueue', function (message) {
       const { fields: {routingKey: topic}, content } =  message
       const data = content.toString()
       if (topic === 'response') {
@@ -109,9 +109,9 @@ receiveFromQueue('microservicesQueue', async function (message) {
       const riskManagementService = new RiskManagementService();
       const riskScore = await riskManagementService.processRisk(data);
       if (riskScore < 50) {
-        sendToQueue('microservicesQueue', 'response', 'Loan application rejected');
+        sendToQueue('clientQueue', 'response', 'Loan application rejected');
       } else {
-        sendToQueue('microservicesQueue', 'response', 'Loan application approved');
+        sendToQueue('clientQueue', 'response', 'Loan application approved');
       }
       sendToQueue('microservicesQueue', 'credit', 'Risk management finished processing');
     }
